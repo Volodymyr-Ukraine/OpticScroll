@@ -11,16 +11,20 @@ import UIKit
 class MyColorScroll: UIControl {
     
     // MARK: -
-    // MARK: Properties
+    // MARK: Public properties
     
     public var value : Float = 0.5
     public var minimumValue : Float = 0.0
     public var maximumValue : Float = 1.0
+    public var minScrollValue : Float = 0.25
+    public var maxScrollValue : Float = 0.75
     
-    public let thumb : UIButton = UIButton()
-    private let shape = CAShapeLayer()
-    private var gradientLayer = CAGradientLayer()
-    private var thumbImage : UIImage = UIImage(named: "2")!
+    public var lineWidth : CGFloat = 1.0
+    
+    public var scrollCoordinates : MyCSValues<Float> = MyCSValues(values: [0.0, 0.25, 0.75, 1.0], doIfValueChenged: {})
+    
+    public var scrollColors : MyCSValues<UIColor> = MyCSValues(values: [.red, .orange, .green , .blue], doIfValueChenged: {})
+
     public var setThumbImage : UIImage {
         get {
             return self.thumbImage
@@ -30,36 +34,16 @@ class MyColorScroll: UIControl {
         }
     }
     
-    public var lineWidth : CGFloat = 1.0
+    public let thumb : UIButton = UIButton()
     
-    private var minScaleValue : Float = 0.0
-    private var minScrollValue : Float = 0.25
-    private var maxScrollValue : Float = 0.75
-    private var maxScaleValue : Float = 1.0
-    public var fourValues: (Float, Float, Float, Float) {
-        get {
-            return (self.minScaleValue, self.minScrollValue, self.maxScrollValue, self.maxScaleValue)
-        }
-        set (newValues) {
-            
-            (self.minScaleValue, self.minScrollValue, self.maxScrollValue, self.maxScaleValue) = newValues
-            drawGradient()
-        }
-    }
-    private var minScaleColor : UIColor = .red
-    private var minScrollColor : UIColor = .orange
-    private var maxScrollColor : UIColor = .green
-    private var maxScaleColor : UIColor = .blue
-    public var fourColors: (UIColor, UIColor, UIColor, UIColor) {
-        get {
-            return (self.minScaleColor, self.minScrollColor, self.maxScrollColor, self.maxScaleColor)
-        }
-        set (newValues) {
-            
-            (self.minScaleColor, self.minScrollColor, self.maxScrollColor, self.maxScaleColor) = newValues
-            drawGradient()
-        }
-    }
+    // MARK: -
+    // MARK: Private properties
+    
+    private let shape = CAShapeLayer()
+    private var gradientLayer = CAGradientLayer()
+    private var thumbImage : UIImage = UIImage(named: "2")!
+    
+ 
     private var maxX : CGFloat {
         get {
             return self.bounds.maxX
@@ -88,8 +72,10 @@ class MyColorScroll: UIControl {
         self.lineWidth = self.maxY / 4
         let drawLine = lineWithCircle(self.value)
         self.gradientLayer = CAGradientLayer(layer: self.layer)
-        drawGradient()
-        layer.addSublayer(self.gradientLayer)
+        self.scrollCoordinates.valueChanged = drawGradient
+        self.scrollColors.valueChanged = drawGradient
+        self.drawGradient()
+        self.layer.addSublayer(self.gradientLayer)
         self.shape.path = drawLine.cgPath
         self.layer.mask = self.shape
         createThumb()
@@ -120,8 +106,9 @@ class MyColorScroll: UIControl {
         self.gradientLayer.frame = self.bounds
         self.gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
         self.gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
-        self.gradientLayer.colors = [self.minScaleColor.cgColor, self.minScrollColor.cgColor, self.maxScrollColor.cgColor, self.maxScaleColor.cgColor]
-        self.gradientLayer.locations = [self.minScaleValue, self.minScrollValue, self.maxScrollValue, self.maxScaleValue] as [NSNumber]
+        self.gradientLayer.colors = self.scrollColors.values.map({ (ucolor) -> CGColor in
+                return ucolor.cgColor})
+        self.gradientLayer.locations = self.scrollCoordinates.values as [NSNumber]
     }
     
     private func lineWithCircle(_ coord: Float) -> UIBezierPath{

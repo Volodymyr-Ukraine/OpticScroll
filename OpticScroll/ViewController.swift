@@ -16,15 +16,16 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let screenSize = self.view.frame.size
-        let screenSize1 = CGRect.init(x: 50, y:300, width: screenSize.width - 100, height: 50)
+        let screenSize1 = CGRect.init(x: 50, y:screenSize.height/4, width: screenSize.width - 100, height: 50)
         self.otherOptic = MyColorScroll(frame: screenSize1)
         self.otherOptic.addTarget(self, action: #selector(changeWidth(_:)), for: .valueChanged)
         self.view.addSubview(otherOptic)
-        
-        let screenSize2 = CGRect.init(x: 0, y: 500, width: screenSize.width, height: 70)
+        print("Other: \(self.otherOptic.frame), \(self.otherOptic.layer.frame)")
+        let screenSize2 = CGRect.init(x: 0, y: screenSize.height/2, width: screenSize.width, height: 70)
         self.newOptic = MyColorScroll(frame: screenSize2)
-        self.newOptic.fourColors = (UIColor.brown, UIColor.red, UIColor.yellow, UIColor.gray)
+        self.newOptic.scrollColors.values = [UIColor.brown, UIColor.red, UIColor.yellow, UIColor.gray]
         self.view.addSubview(newOptic)
+        
     }
     
     @objc private func changeWidth (_ sender: Any) {
